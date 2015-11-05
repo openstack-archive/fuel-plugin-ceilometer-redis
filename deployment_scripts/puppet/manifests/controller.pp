@@ -30,5 +30,5 @@ class {'::redis::main':
   primary_redis_node => $primary_redis_node[0],
   redis_hosts        => $redis_hosts,
   redis_bind_address => $redis_bind_address,
-  primary_controller => false,
+  primary_controller => hiera('primary_controller'),
 }
