@@ -7,6 +7,8 @@ Install the Plugin
 
 To install the Redis plugin:
 
+#. Please refer to `Limitations`_ before you proceed
+
 #. Download the Redis plugin from the
    `Fuel Plugins Catalog <https://www.mirantis.com/products/openstack-drivers-and-plugins/fuel-plugins/>`_.
 
@@ -27,9 +29,9 @@ To install the Redis plugin:
 #. Verify that the plugin is installed correctly::
 
      [root@fuel-master ~]# fuel plugins list
-     id | name             | version | package_version
-     ---|------------------|---------|----------------
-     4  | ceilometer-redis | 1.0.0   | 2.0.0
+     id | name             | version       | package_version
+     ---|------------------|---------------|----------------
+     4  | ceilometer-redis | 1.0-1.0.0-1   | 2.0.0
 
 
 
