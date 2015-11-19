@@ -27,9 +27,9 @@ To install the Redis plugin:
 #. Verify that the plugin is installed correctly::
 
      [root@fuel-master ~]# fuel plugins list
-     id | name             | version | package_version
-     ---|------------------|---------|----------------
-     4  | ceilometer-redis | 1.0.0   | 2.0.0
+     id | name             | version       | package_version
+     ---|------------------|---------------|----------------
+     4  | ceilometer-redis | 1.0-1.0.0-1   | 2.0.0
 
 
 
