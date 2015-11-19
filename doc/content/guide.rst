@@ -28,6 +28,12 @@ Plugin configuration
    .. image:: images/redis-plugin-on.png
     :width: 100%
 
+#. When
+   `adding nodes to environment and assigning roles to them <https://docs.mirantis.com/openstack/fuel/fuel-7.0/user-guide.html#add-nodes-ug>`_, please consider using odd number of controllers as mentioned in `Limitations`_.
+
+#. Finish
+   `environment configuration <https://docs.mirantis.com/openstack/fuel/fuel-7.0/user-guide.html#configure-your-environment>`_
+
 #. Run `network verification check <https://docs.mirantis.com/openstack/fuel/fuel-7.0/user-guide.html#verify-networks>`_.
 
 #. Press `Deploy button <https://docs.mirantis.com/openstack/fuel/fuel-7.0/user-guide.html#deploy-changes>`_ to once you are done with environment configuration.
