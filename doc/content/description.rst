@@ -24,12 +24,20 @@ Fuel                    7.0
 tooz                    <0.14.0,>=0.13.1
 ======================= ================
 
+.. _limitations:
+
 Limitations
 -----------
 
-* The plugin version 1.0.0 provides coordination only for Agent Central service.
+* The plugin version 1.0-1.0.0-1 provides coordination only for Agent Central service.
   Alarm evaluator and Notification agent will be supported in the next plugin
   version.
 
+* The plugin works correctly only on clouds with odd numbers of controllers.
+  This requirement is mandatory because Redis needs an odd number of nodes to
+  choose the master successfully.
+
 .. include:: installation.rst
 .. include:: guide.rst
+
+
