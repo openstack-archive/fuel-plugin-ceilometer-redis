@@ -116,6 +116,7 @@ class redis::main (
     'coordination/backend_url'    : value => redis_backend_url($redis_hosts, $redis_sentinel_port, $timeout);
     'coordination/heartbeat'      : value => '1.0';
     'coordination/check_watchers' : value => $timeout;
+    'notification/workload_partitioning': value => true
   }
 
   if $primary_controller {
@@ -125,7 +126,14 @@ class redis::main (
       onlyif  => 'pcs resource show p_ceilometer-agent-central > /dev/null 2>&1',
     }
 
+    exec {'remove_old_resource_alarm_evaluator':
+      path => '/usr/sbin:/usr/bin:/sbin:/bin',
+      command => 'pcs resource delete p_ceilometer-alarm-evaluator --wait=120',
+      onlyif  => 'pcs resource show p_ceilometer-alarm-evaluator > /dev/null 2>&1',
+    }
+
     Exec['remove_old_resource_central_agent'] -> Cluster::Corosync::Cs_service["$::ceilometer::params::agent_central_service_name"]
+    Exec['remove_old_resource_alarm_evaluator'] -> Cluster::Corosync::Cs_service["$::ceilometer::params::alarm_evaluator_service_name"]
   }
 
   file {'redis_ocf_script':
@@ -152,6 +160,22 @@ class redis::main (
     hasrestart          => false,
   }
 
+  cluster::corosync::cs_service { "$::ceilometer::params::alarm_evaluator_service_name":
+    ocf_script          => 'ceilometer-alarm-evaluator',
+    csr_parameters      => {},
+    csr_metadata        => undef,
+    csr_complex_type    => 'clone',
+    csr_ms_metadata     => { 'interleave' => true },
+    csr_mon_intr        => '20',
+    csr_mon_timeout     => '10',
+    csr_timeout         => '60',
+    service_name        => $::ceilometer::params::alarm_evaluator_service_name,
+    package_name        => $::ceilometer::params::alarm_evaluator_package_name,
+    service_title       => 'ceilometer-alarm-evaluator',
+    primary             => $primary_controller,
+    hasrestart          => false,
+  }
+
   cluster::corosync::cs_service { 'redis':
     ocf_script          => 'redis-server',
     csr_parameters      => {},
@@ -172,13 +196,21 @@ class redis::main (
   File['redis_ocf_script'] ->
   Cluster::Corosync::Cs_service['redis'] ->
   Ceilometer_config <||> ->
-  Cluster::Corosync::Cs_service["$::ceilometer::params::agent_central_service_name"]
+  Cluster::Corosync::Cs_service["$::ceilometer::params::agent_central_service_name"] ->
+  Cluster::Corosync::Cs_service["$::ceilometer::params::alarm_evaluator_service_name"]
 
   if !$primary_controller {
     exec {'waiting-for-agent-up-on-primary':
       tries     => 10,
       try_sleep => 30,
       command   => "pcs resource | grep -A 1 p_${::ceilometer::params::agent_central_service_name} | grep Started > /dev/null 2>&1",
+      path      => '/usr/sbin:/usr/bin:/sbin:/bin',
+    }
+
+    exec {'waiting-for-evaluator-up-on-primary':
+      tries     => 10,
+      try_sleep => 30,
+      command   => "pcs resource | grep -A 1 p_${::ceilometer::params::alarm_evaluator_service_name} | grep Started > /dev/null 2>&1",
       path      => '/usr/sbin:/usr/bin:/sbin:/bin',
     }
 
@@ -190,6 +222,14 @@ class redis::main (
     }
 
     service {"p_${::ceilometer::params::agent_central_service_name}":
+      enable     => true,
+      ensure     => 'running',
+      hasstatus  => true,
+      hasrestart => true,
+      provider   => 'pacemaker',
+    }
+
+    service {"p_${::ceilometer::params::alarm_evaluator_service_name}":
       enable     => true,
       ensure     => 'running',
       hasstatus  => true,
@@ -210,7 +250,9 @@ class redis::main (
     Cluster::Corosync::Cs_service['redis'] ->
     Exec['waiting-for-agent-up-on-primary'] ->
     Ceilometer_config <||> ->
-    Cluster::Corosync::Cs_service["$::ceilometer::params::agent_central_service_name"]
+    Cluster::Corosync::Cs_service["$::ceilometer::params::agent_central_service_name"] ->
+    Exec['waiting-for-evaluator-up-on-primary'] ->
+    Cluster::Corosync::Cs_service["$::ceilometer::params::alarm_evaluator_service_name"]
   }
 
   service { 'ceilometer-agent-central':
@@ -218,4 +260,19 @@ class redis::main (
     name    => $::ceilometer::params::agent_central_service_name,
     enable  => false,
   }
+
+  service { 'ceilometer-alarm-evaluator':
+    ensure  => 'stopped',
+    name    => $::ceilometer::params::alarm_evaluator_service_name,
+    enable  => false,
+  }
+
+  service { 'ceilometer-agent-notification':
+    ensure     => $service_ensure,
+    name       => $::ceilometer::params::agent_notification_service_name,
+    enable     => $enabled,
+    hasstatus  => true,
+    hasrestart => true,
+  }
+
 }
