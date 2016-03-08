@@ -47,6 +47,7 @@ class redis::sentinel (
   $service_restart          = true,
   $manage_upstart_scripts   = true,
   $package_name             = undef,
+  $master_name              = 'mymaster'
 ) {
 
   include redis::sentinel_params

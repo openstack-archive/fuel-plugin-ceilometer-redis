@@ -54,6 +54,7 @@ class redis::main (
   $redis_bind_address      = '0.0.0.0',
   $redis_port              = '6379',
   $redis_sentinel_port     = '26379',
+  $master_name             = 'mymaster',
 ) {
 
   include ceilometer::params
@@ -107,9 +108,14 @@ class redis::main (
   }
 
   # Use custom function to generate sentinel configuration
-  $sentinel_confs = sentinel_confs($redis_hosts, $redis_port, $quorum,
-                                    $parallel_syncs, $down_after_milliseconds,
-                                    $failover_timeout)
+  $masters_to_monitor = [
+    { name => $master_name,
+      addr => $primary_redis_node
+    },
+  ]
+  $sentinel_confs = sentinel_confs($masters_to_monitor, $redis_port, $quorum,
+                                   $parallel_syncs, $down_after_milliseconds,
+                                   $failover_timeout)
 
   package {'python-redis':
     ensure => 'present',
@@ -127,10 +133,11 @@ class redis::main (
     conf_port              => $redis_sentinel_port,
     sentinel_confs         => $sentinel_confs,
     manage_upstart_scripts => $manage_upstart_scripts,
+    master_name            => $master_name
   }
 
   ceilometer_config {
-    'coordination/backend_url'    : value => redis_backend_url($redis_hosts, $redis_sentinel_port, $timeout);
+    'coordination/backend_url'    : value => redis_backend_url($redis_hosts, $redis_sentinel_port, $timeout, $master_name);
     'coordination/heartbeat'      : value => '1.0';
     'coordination/check_watchers' : value => $timeout;
     'notification/workload_partitioning': value => true

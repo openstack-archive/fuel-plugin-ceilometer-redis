@@ -12,10 +12,13 @@ module Puppet::Parser::Functions
     hash = {}
 
     nodes.each do |value|
-      hash[value] = { 'monitor' => value + ' ' + port + ' ' + quorum,
-                      'down-after-milliseconds' => down_after_milliseconds,
-                      'failover-timeout' => failover_timeout,
-                      'parallel-syncs' => parallel_syncs }
+      name = value['name']
+      addr = value['addr']
+      hash[name] = {
+                     'monitor' => addr + ' ' + port + ' ' + quorum,
+                     'down-after-milliseconds' => down_after_milliseconds,
+                     'failover-timeout' => failover_timeout,
+                     'parallel-syncs' => parallel_syncs }
     end
 
     hash

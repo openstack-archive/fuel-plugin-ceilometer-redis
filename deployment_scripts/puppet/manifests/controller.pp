@@ -26,9 +26,14 @@ $redis_primary_nodes       = get_nodes_hash_by_roles(hiera('network_metadata'), 
 $redis_primary_address_map = get_node_to_ipaddr_map_by_network_role($redis_primary_nodes, 'ceilometer/api')
 $primary_redis_node        = values($redis_primary_address_map)
 
+# TODO: get value from hiera
+$master_name               = 'ceilometer_redis_master'
+
+
 class {'::redis::main':
   primary_redis_node => $primary_redis_node[0],
   redis_hosts        => $redis_hosts,
   redis_bind_address => $redis_bind_address,
   primary_controller => hiera('primary_controller'),
+  master_name        => $master_name,
 }
