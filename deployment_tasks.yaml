@@ -1,0 +1,9 @@
+- id: ceilometer_redis
+  type: puppet
+  groups: [primary-controller, controller]
+  required_for: [deploy_end]
+  requires: [ceilometer-controller]
+  parameters:
+    puppet_manifest: "puppet/manifests/controller.pp"
+    puppet_modules: "puppet/modules:/etc/puppet/modules"
+    timeout: 3600

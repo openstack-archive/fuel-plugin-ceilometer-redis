@@ -147,12 +147,16 @@ class redis::main (
     ensure  => 'running',
     name    => $::ceilometer::params::agent_central_service_name,
     enable  => true,
+    hasstatus  => true,
+    hasrestart => true,
   }
 
   service { 'ceilometer-alarm-evaluator':
     ensure  => 'running',
     name    => $::ceilometer::params::alarm_evaluator_service_name,
     enable  => true,
+    hasstatus  => true,
+    hasrestart => true,
   }
 
   service { 'ceilometer-agent-notification':
@@ -190,10 +194,11 @@ class redis::main (
   }
 
   Pacemaker_wrappers::Service['redis-server'] ->
-  Ceilometer_config <||> ->
   Pacemaker_wrappers::Service["$::ceilometer::params::agent_central_service_name"] ->
   Pacemaker_wrappers::Service["$::ceilometer::params::alarm_evaluator_service_name"]
 
+  Ceilometer_config <||> ~> Service["$::ceilometer::params::agent_central_service_name"]
+  Ceilometer_config <||> ~> Service["$::ceilometer::params::alarm_evaluator_service_name"]
   Ceilometer_config <||> ~> Service['ceilometer-agent-notification']
 
 }
