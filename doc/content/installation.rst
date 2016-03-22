@@ -13,7 +13,7 @@ To install the Redis plugin:
    `Fuel Plugins Catalog <https://www.mirantis.com/products/openstack-drivers-and-plugins/fuel-plugins/>`_.
 
 #. Move the plugin's rpm to the
-   `Fuel Master node <https://docs.mirantis.com/openstack/fuel/fuel-7.0/quickstart-guide.html#quickstart-guide>`_ with secure copy (scp)::
+   `Fuel Master node <https://docs.mirantis.com/openstack/fuel/fuel-8.0/quickstart-guide.html#quickstart-guide>`_ with secure copy (scp)::
 
         scp fuel-plugin-ceilometer-redis/ceilometer-redis-1.0-1.0.0-1.noarch.rpm /
         root@:<the_Fuel_Master_node_IP address>:/tmp
