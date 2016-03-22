@@ -3,9 +3,9 @@ name: ceilometer-redis
 # Human-readable name for your plugin
 title: Redis plugin for Ceilometer
 # Plugin version
-version: 1.0.1
+version: 1.0.2
 # Description
-description: Ceilometer extension that provide workload-partitioning and HA for ceilometer services
+description: Ceilometer extension that provides a workload-partitioning and HA for ceilometer services
 # Required fuel version
 fuel_version: ['7.0','8.0']
 # Specify license of your plugin
