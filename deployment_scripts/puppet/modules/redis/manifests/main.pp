@@ -137,68 +137,40 @@ class redis::main (
   }
 
   ceilometer_config {
-    'coordination/backend_url'    : value => redis_backend_url($redis_hosts, $redis_sentinel_port, $timeout, $master_name);
-    'coordination/heartbeat'      : value => '1.0';
-    'coordination/check_watchers' : value => $timeout;
+    'coordination/backend_url'          : value => redis_backend_url($redis_hosts, $redis_sentinel_port, $timeout, $master_name);
+    'coordination/heartbeat'            : value => '1.0';
+    'coordination/check_watchers'       : value => $timeout;
     'notification/workload_partitioning': value => true
   }
 
   service { 'ceilometer-agent-central':
-    ensure  => 'running',
-    name    => $::ceilometer::params::agent_central_service_name,
-    enable  => true,
-    hasstatus  => true,
-    hasrestart => true,
-  }
-
-  service { 'ceilometer-alarm-evaluator':
-    ensure  => 'running',
-    name    => $::ceilometer::params::alarm_evaluator_service_name,
-    enable  => true,
-    hasstatus  => true,
-    hasrestart => true,
-  }
-
-  service { 'ceilometer-agent-notification':
     ensure     => 'running',
-    name       => $::ceilometer::params::agent_notification_service_name,
+    name       => $::ceilometer::params::agent_central_service_name,
     enable     => true,
     hasstatus  => true,
     hasrestart => true,
   }
 
-  pacemaker_wrappers::service { $::ceilometer::params::agent_central_service_name :
-    complex_type    => 'clone',
-    ms_metadata     => { 'interleave' => true },
-    primitive_type  => 'ceilometer-agent-central',
-    metadata        => $metadata,
-    parameters      => { 'user' => 'ceilometer' },
-    operations      => $operations,
+  pacemaker::service { $::ceilometer::params::agent_central_service_name :
+    complex_type     => 'clone',
+    complex_metadata => { 'interleave' => true },
+    primitive_type   => 'ceilometer-agent-central',
+    metadata         => $metadata,
+    parameters       => { 'user' => 'ceilometer' },
+    operations       => $operations,
   }
 
-  pacemaker_wrappers::service { $::ceilometer::params::alarm_evaluator_service_name :
-    complex_type    => 'clone',
-    ms_metadata     => { 'interleave' => true },
-    primitive_type  => 'ceilometer-alarm-evaluator',
-    metadata        => $metadata,
-    parameters      => { 'user' => 'ceilometer' },
-    operations      => $operations,
+  pacemaker::service { 'redis-server' :
+    ocf_script_file  => 'redis/ocf/redis-server',
+    complex_type     => 'clone',
+    complex_metadata => { 'interleave' => true },
+    primitive_type   => 'redis-server',
+    operations       => $operations,
   }
 
-  pacemaker_wrappers::service { 'redis-server' :
-    ocf_script_file => 'redis/ocf/redis-server',
-    complex_type    => 'clone',
-    ms_metadata     => { 'interleave' => true },
-    primitive_type  => 'redis-server',
-    operations      => $operations,
-  }
-
-  Pacemaker_wrappers::Service['redis-server'] ->
-  Pacemaker_wrappers::Service["$::ceilometer::params::agent_central_service_name"] ->
-  Pacemaker_wrappers::Service["$::ceilometer::params::alarm_evaluator_service_name"]
+  Pacemaker::Service['redis-server'] ->
+  Pacemaker::Service["$::ceilometer::params::agent_central_service_name"]
 
   Ceilometer_config <||> ~> Service["$::ceilometer::params::agent_central_service_name"]
-  Ceilometer_config <||> ~> Service["$::ceilometer::params::alarm_evaluator_service_name"]
-  Ceilometer_config <||> ~> Service['ceilometer-agent-notification']
 
 }
