@@ -151,14 +151,6 @@ class redis::main (
     hasrestart => true,
   }
 
-  service { 'ceilometer-alarm-evaluator':
-    ensure  => 'running',
-    name    => $::ceilometer::params::alarm_evaluator_service_name,
-    enable  => true,
-    hasstatus  => true,
-    hasrestart => true,
-  }
-
   service { 'ceilometer-agent-notification':
     ensure     => 'running',
     name       => $::ceilometer::params::agent_notification_service_name,
@@ -176,14 +168,6 @@ class redis::main (
     operations      => $operations,
   }
 
-  pacemaker_wrappers::service { $::ceilometer::params::alarm_evaluator_service_name :
-    complex_type    => 'clone',
-    ms_metadata     => { 'interleave' => true },
-    primitive_type  => 'ceilometer-alarm-evaluator',
-    metadata        => $metadata,
-    parameters      => { 'user' => 'ceilometer' },
-    operations      => $operations,
-  }
 
   pacemaker_wrappers::service { 'redis-server' :
     ocf_script_file => 'redis/ocf/redis-server',
@@ -194,11 +178,9 @@ class redis::main (
   }
 
   Pacemaker_wrappers::Service['redis-server'] ->
-  Pacemaker_wrappers::Service["$::ceilometer::params::agent_central_service_name"] ->
-  Pacemaker_wrappers::Service["$::ceilometer::params::alarm_evaluator_service_name"]
+  Pacemaker_wrappers::Service["$::ceilometer::params::agent_central_service_name"]
 
   Ceilometer_config <||> ~> Service["$::ceilometer::params::agent_central_service_name"]
-  Ceilometer_config <||> ~> Service["$::ceilometer::params::alarm_evaluator_service_name"]
   Ceilometer_config <||> ~> Service['ceilometer-agent-notification']
 
 }
