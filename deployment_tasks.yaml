@@ -1,8 +1,34 @@
+## we must upload ocf scripts on all controllers before
+## create clone resources.
+- id: primary_create_redis_ocf
+  type: puppet
+  groups: [primary-controller]
+  required_for: [deploy_end]
+  requires: [ceilometer-controller]
+  parameters:
+    puppet_manifest: "puppet/manifests/create_redis_ocf.pp"
+    puppet_modules: "puppet/modules:/etc/puppet/modules"
+    timeout: 3600
+
+- id: create_redis_ocf
+  type: puppet
+  groups: [controller]
+  required_for: [deploy_end]
+  requires: [ceilometer-controller]
+  cross-depends:
+    - name: primary_create_redis_ocf
+  parameters:
+    puppet_manifest: "puppet/manifests/create_redis_ocf.pp"
+    puppet_modules: "puppet/modules:/etc/puppet/modules"
+    timeout: 3600
+
 - id: ceilometer_redis
   type: puppet
   groups: [primary-controller, controller]
   required_for: [deploy_end]
   requires: [ceilometer-controller]
+  cross-depends:
+    - name: create_redis_ocf
   parameters:
     puppet_manifest: "puppet/manifests/controller.pp"
     puppet_modules: "puppet/modules:/etc/puppet/modules"
