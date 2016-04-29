@@ -58,6 +58,7 @@ class redis::main (
 ) {
 
   include ceilometer::params
+  include aodh::params
   include redis::params
 
   case $::osfamily {
@@ -142,18 +143,24 @@ class redis::main (
     'coordination/check_watchers' : value => $timeout;
   }
 
+  aodh_config {
+    'coordination/backend_url'    : value => redis_backend_url($redis_hosts, $redis_sentinel_port, $timeout, $master_name);
+    'coordination/heartbeat'      : value => '1.0';
+    'coordination/check_watchers' : value => $timeout;
+  }
+
   service { 'ceilometer-agent-central':
-    ensure  => 'running',
-    name    => $::ceilometer::params::agent_central_service_name,
-    enable  => true,
+    ensure     => 'running',
+    name       => $::ceilometer::params::agent_central_service_name,
+    enable     => true,
     hasstatus  => true,
     hasrestart => true,
   }
 
-  service { 'ceilometer-alarm-evaluator':
-    ensure  => 'running',
-    name    => $::ceilometer::params::alarm_evaluator_service_name,
-    enable  => true,
+  service { 'aodh-evaluator':
+    ensure     => 'running',
+    name       => $::aodh::params::evaluator_service_name,
+    enable     => true,
     hasstatus  => true,
     hasrestart => true,
   }
@@ -166,38 +173,74 @@ class redis::main (
     hasrestart => true,
   }
 
-  pacemaker_wrappers::service { $::ceilometer::params::agent_central_service_name :
-    complex_type    => 'clone',
-    ms_metadata     => { 'interleave' => true },
-    primitive_type  => 'ceilometer-agent-central',
-    metadata        => $metadata,
-    parameters      => { 'user' => 'ceilometer' },
-    operations      => $operations,
+  pacemaker::service { $::ceilometer::params::agent_central_service_name :
+    complex_type     => 'clone',
+    complex_metadata => { 'interleave' => true },
+    primitive_type   => 'ceilometer-agent-central',
+    metadata         => $metadata,
+    parameters       => { 'user' => 'ceilometer' },
+    operations       => $operations,
   }
 
-  pacemaker_wrappers::service { $::ceilometer::params::alarm_evaluator_service_name :
-    complex_type    => 'clone',
-    ms_metadata     => { 'interleave' => true },
-    primitive_type  => 'ceilometer-alarm-evaluator',
-    metadata        => $metadata,
-    parameters      => { 'user' => 'ceilometer' },
-    operations      => $operations,
+  pacemaker::service { $::aodh::params::evaluator_service_name :
+    complex_type     => 'clone',
+    complex_metadata => { 'interleave' => true },
+    primitive_type   => 'aodh-evaluator',
+    metadata         => $metadata,
+    parameters       => { 'user' => 'aodh' },
+    operations       => $operations,
   }
 
-  pacemaker_wrappers::service { 'redis-server' :
-    ocf_script_file => 'redis/ocf/redis-server',
-    complex_type    => 'clone',
-    ms_metadata     => { 'interleave' => true },
-    primitive_type  => 'redis-server',
-    operations      => $operations,
+  pacemaker::service { 'redis-server' :
+    ocf_script_file  => 'redis/ocf/redis-server',
+    complex_type     => 'clone',
+    complex_metadata => { 'interleave' => true },
+    primitive_type   => 'redis-server',
+    operations       => $operations,
   }
 
-  Pacemaker_wrappers::Service['redis-server'] ->
-  Pacemaker_wrappers::Service["$::ceilometer::params::agent_central_service_name"] ->
-  Pacemaker_wrappers::Service["$::ceilometer::params::alarm_evaluator_service_name"]
+  # During deploy of plugin we need to update resource type from simple to
+  # clone, but this is not working with current implementation of pcmk_resource
+  # type (https://bugs.launchpad.net/fuel/+bug/1580660), that's why we need a
+  # workaround below, this dirty workaround should be removed once
+  # https://bugs.launchpad.net/fuel/+bug/1580660 is fixed.
+  $old_ceilometer_primitive_exists=inline_template("<%= `if pcs resource show | grep -q '^ p_ceilometer-agent-central'; then /bin/echo true; fi;`%>")
+  $old_aodh_primitive_exists=inline_template("<%= `if pcs resource show | grep -q '^ p_aodh-evaluator'; then /bin/echo true; fi;`%>")
+
+  if $old_ceilometer_primitive_exists {
+
+    notify { "Ceilometer agent central simple primitive exists and will be removed": }
+
+    exec { 'remove_old_resource_central_agent':
+       path    => '/usr/sbin:/usr/bin:/sbin:/bin',
+       command => 'pcs resource delete p_ceilometer-agent-central --wait=120',
+    }
+    Exec['remove_old_resource_central_agent'] ->
+    Pacemaker::Service['redis-server'] ->
+    Pacemaker::Service["$::ceilometer::params::agent_central_service_name"]
+  } else {
+    Pacemaker::Service['redis-server'] ->
+    Pacemaker::Service["$::ceilometer::params::agent_central_service_name"]
+  }
+
+  if $old_aodh_primitive_exists {
+
+    notify { "Aodh evaluator simple primitive exists and will be removed": }
+
+    exec { 'remove_old_resource_aodh_evaluator':
+       path    => '/usr/sbin:/usr/bin:/sbin:/bin',
+       command => 'pcs resource delete p_aodh-evaluator --wait=120',
+    }
+    Exec['remove_old_resource_aodh_evaluator'] ->
+    Pacemaker::Service['redis-server'] ->
+    Pacemaker::Service["$::aodh::params::evaluator_service_name"]
+  } else {
+    Pacemaker::Service['redis-server'] ->
+    Pacemaker::Service["$::aodh::params::evaluator_service_name"]
+  }
 
   Ceilometer_config <||> ~> Service["$::ceilometer::params::agent_central_service_name"]
-  Ceilometer_config <||> ~> Service["$::ceilometer::params::alarm_evaluator_service_name"]
+  Aodh_config <||> ~> Service["$::aodh::params::evaluator_service_name"]
   Ceilometer_config <||> ~> Service['ceilometer-agent-notification']
 
 }
