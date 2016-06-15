@@ -73,7 +73,4 @@ Limitations
   ceilometer's pipeline.yaml. Thus, you need to configure it manually if you want to use transformers.
   If you don't need this feature, it is recommended to disable coordination for the notification agents.
 
-.. include:: installation.rst
-.. include:: guide.rst
-
 

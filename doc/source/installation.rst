@@ -1,3 +1,4 @@
+.. _installation guide:
 
 Installation Guide
 ==================
@@ -7,7 +8,7 @@ Install the Plugin
 
 To install the Redis plugin:
 
-#. Please refer to `Limitations`_ before you proceed.
+#. Please refer to limitations before you proceed.
 
 #. Download the Redis plugin from the
    `Fuel Plugins Catalog <https://www.mirantis.com/products/openstack-drivers-and-plugins/fuel-plugins/>`_.

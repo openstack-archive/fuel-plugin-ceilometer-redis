@@ -1,7 +1,7 @@
 User Guide
 ==========
 
-Once the Ceilometer Redis plugin plugin has been installed (following `Installation Guide`_), you can
+Once the Ceilometer Redis plugin plugin has been installed  (following :ref:`Installation Guide`), you can
 create *OpenStack* environments with Ceilometer whose Central agents, Notification agent and Alarm evaluator
 work in workload_partitioned mode.
 
@@ -29,8 +29,7 @@ Plugin configuration in MOS 8.0
    .. image:: images/redis-plugin-8.0.png
     :width: 100%
 
-#. When
-   `adding nodes to environment and assigning roles to them <https://docs.mirantis.com/openstack/fuel/fuel-8.0/operations.html#adding-redeploying-and-replacing-nodes>`_, please consider using odd number of controllers as mentioned in `Limitations`_.
+#. When adding nodes to environment and assigning roles to them <https://docs.mirantis.com/openstack/fuel/fuel-8.0/operations.html#adding-redeploying-and-replacing-nodes>`_, please consider using odd number of controllers as mentioned in :ref:`Limitations`.
 
 #. Finish
    `environment configuration <https://docs.mirantis.com/openstack/fuel/fuel-8.0/mos-planning-guide.html#fuel-reference-architecture-overview>`_
@@ -55,12 +54,12 @@ Plugin configuration in MOS 7.0
     :width: 100%
 
 #. When
-   `adding nodes to environment and assigning roles to them <https://docs.mirantis.com/openstack/fuel/fuel-7.0/user-guide.html#add-nodes-ug>`_, please consider using odd number of controllers as mentioned in `Limitations`_.
+   `adding nodes to environment and assigning roles to them in MOS 7.0 <https://docs.mirantis.com/openstack/fuel/fuel-7.0/user-guide.html#add-nodes-ug>`_, please consider using odd number of controllers as mentioned in :ref:`Limitations`.
 
 #. Finish
-   `environment configuration <https://docs.mirantis.com/openstack/fuel/fuel-7.0/user-guide.html#configure-your-environment>`_
+   `environment configuration for MOS 7.0 <https://docs.mirantis.com/openstack/fuel/fuel-7.0/user-guide.html#configure-your-environment>`_
 
-#. Run `network verification check <https://docs.mirantis.com/openstack/fuel/fuel-7.0/user-guide.html#verify-networks>`_.
+#. Run `network verification check for MOS 7.0 <https://docs.mirantis.com/openstack/fuel/fuel-7.0/user-guide.html#verify-networks>`_.
 
 #. Press `Deploy button <https://docs.mirantis.com/openstack/fuel/fuel-7.0/user-guide.html#deploy-changes>`_ to once you are done with environment configuration.
 
