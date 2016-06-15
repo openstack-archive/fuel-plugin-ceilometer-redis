@@ -2,7 +2,7 @@ User Guide
 ==========
 
 Once the Ceilometer Redis plugin plugin has been installed  (following :ref:`Installation Guide`), you can
-create *OpenStack* environments with Ceilometer whose Central agents, Notification agent and Alarm evaluator
+create *OpenStack* environments with Ceilometer whose Central agents and Alarm evaluator
 work in workload_partitioned mode.
 
 Ceilometer installation
@@ -110,15 +110,6 @@ How to check that plugin works
         .... 2015-11-05T10:26:26 |
         .... 2015-11-05T10:26:17 |
 
-#. For the notification agent: Check that IPC queues are created and have consumers:
-        ubuntu@ubuntu:/opt/stack/ceilometer$ sudo rabbitmqctl list_queues name messages consumers | grep ceilo
-        ceilometer-pipe-meter_source:meter_sink-0.sample        0    1
-        ceilometer-pipe-meter_source:meter_sink-1.sample        0    1
-        ceilometer-pipe-meter_source:meter_sink-2.sample        0    1
-        ceilometer-pipe-meter_source:meter_sink-3.sample        0    1
-        ceilometer-pipe-meter_source:meter_sink-4.sample        0    1
-
-        By default, you should see 10 queues in this list. Every queue should have one and only one consumer.
 
 #. For the alarm evaluator, it is possible to see that everything works as expected only from the logs. Grep the
    line "extract_my_subset". There should be different "My subset: [" results on each alarm evaluator instance.
