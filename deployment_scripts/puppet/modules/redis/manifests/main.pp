@@ -139,8 +139,7 @@ class redis::main (
   ceilometer_config {
     'coordination/backend_url'    : value => redis_backend_url($redis_hosts, $redis_sentinel_port, $timeout, $master_name);
     'coordination/heartbeat'      : value => '1.0';
-    'coordination/check_watchers' : value => $timeout;
-    'notification/workload_partitioning': value => true
+    'coordination/check_watchers' : value => $timeout
   }
 
   service { 'ceilometer-agent-central':
