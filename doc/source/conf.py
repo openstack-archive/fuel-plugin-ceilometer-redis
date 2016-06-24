@@ -4,10 +4,10 @@ extensions = []
 templates_path = ['_templates']
 source_suffix = '.rst'
 master_doc = 'index'
-project = u'The Redis Plugin for Ceilometer documentation'
+project = u'The Ceilometer Redis Plugin'
 copyright = u'2016, Mirantis Inc.'
 version = '0.1'
-release = '0.1.0'
+release = '0.1.2'
 exclude_patterns = [
 ]
 pygments_style = 'sphinx'
@@ -16,15 +16,15 @@ htmlhelp_basename = 'RedisPlugindoc'
 latex_elements = {
 }
 latex_documents = [
-  ('index', 'RedisPlugindoc.tex', u'The Redis Plugin for Ceilometer documentation',
+  ('index', 'RedisPlugindoc.tex', u'The Ceilometer Redis Plugin',
    u'Mirantis Inc.', 'manual'),
 ]
 man_pages = [
-    ('index', 'redisplugin', u'The Redis Plugin for Ceilometer documentation',
+    ('index', 'redisplugin', u'The Ceilometer Redis Plugin',
      [u'Mirantis Inc.'], 1)
 ]
 texinfo_documents = [
-  ('index', 'RedisPlugin', u'The Redis Plugin for Ceilometer documentation',
+  ('index', 'RedisPlugin', u'The Ceilometer Redis Plugin',
    u'Mirantis Inc.', 'RedisPlugin', 'One line description of project.',
    'Miscellaneous'),
 ]
