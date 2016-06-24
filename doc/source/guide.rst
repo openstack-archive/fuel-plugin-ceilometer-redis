@@ -1,115 +1,109 @@
 User Guide
 ==========
 
-Once the Ceilometer Redis plugin plugin has been installed  (following :ref:`Installation Guide`), you can
-create *OpenStack* environments with Ceilometer whose Central agents and Alarm evaluator
-work in workload_partitioned mode.
+Once the *Ceilometer Redis Plugin* is installed following the instructions of
+the :ref:`Installation Guide`, you can create a Mirantis OpenStack (MOS) environment
+with Ceilometer whose **ceilometer-agent-central** and **ceilometer-alarm-evaluator**
+services will work in **workload partitioned** mode.  
+This plugin was created to enable the scale-out of these Ceilometer services. 
+It is useless and **shouldn't be used if Ceilometer is not installed**.
 
-Ceilometer installation
------------------------
+Plugin Configuration
+--------------------
 
-This plugin was created to provide partitioning for Ceilometer services. So its
-usage is senseless without Ceilometer installed.
-So, you will need to `create a new OpenStack environment <https://docs.mirantis.com/openstack/fuel/fuel-8.0/user-guide.html#create-a-new-openstack-environment>`_
-with `Ceilometer <https://docs.mirantis.com/openstack/fuel/fuel-8.0/user-guide.html#related-projects>`_ using the Fuel UI Wizard.
+To use the *Ceilometer Redis Plugin*, you need to `create a new MOS environment
+<http://docs.openstack.org/developer/fuel-docs/userdocs/fuel-user-guide/create-environment.html>`_
+with the `Telemetry service 
+<http://docs.openstack.org/admin-guide/telemetry.html>`_
+(a.k.a Ceilometer) enabled and follow these steps using the *Fuel UI Wizard*.
 
+1. Make sure that the plugin is properly installed on the Fuel Master node.
 
-Plugin configuration in MOS 8.0
--------------------------------
-
-#. First of all, make sure that plugin was successfully installed.
    Go to the *Plugins* tab. You should see the following:
 
-   .. image:: images/redis-plugin-on8.0.png
-    :width: 100%
-
-#. The next step is enable the plugin. Go to *Environments* tab and
-   select the *Redis plugin for Ceilometer* checkbox:
-
-   .. image:: images/redis-plugin-8.0.png
-    :width: 100%
-
-#. When adding nodes to environment and assigning roles to them <https://docs.mirantis.com/openstack/fuel/fuel-8.0/operations.html#adding-redeploying-and-replacing-nodes>`_, please consider using odd number of controllers as mentioned in :ref:`Limitations`.
-
-#. Finish
-   `environment configuration <https://docs.mirantis.com/openstack/fuel/fuel-8.0/mos-planning-guide.html#fuel-reference-architecture-overview>`_
-
-#. Run `network verification check <https://docs.mirantis.com/openstack/fuel/fuel-8.0/operations.html#network-issues>`_.
-
-#. Press "Deploy button" to once you are done with environment configuration.
-
-Plugin configuration in MOS 7.0
--------------------------------
-
-#. First of all, make sure that plugin was successfully installed.
-   Go to the *Plugins* tab. You should see the following:
+   On Mos 8.0
 
    .. image:: images/redis-plugin.png
     :width: 100%
 
-#. The next step is enable the plugin. Go to *Environments* tab and
-   select the *Redis plugin for Ceilometer* checkbox:
+   On Mos 7.0
+
+   .. image:: images/redis-plugin-on8.0.png
+    :width: 100%
+
+2. Enable the plugin.
+
+   Go to the *Environments* tab and select the *Redis plugin for Ceilometer* checkbox:
+
+   On Mos 8.0
+
+   .. image:: images/redis-plugin-8.0.png
+    :width: 100%
+
+   On Mos 7.0
 
    .. image:: images/redis-plugin-on.png
     :width: 100%
 
-#. When
-   `adding nodes to environment and assigning roles to them in MOS 7.0 <https://docs.mirantis.com/openstack/fuel/fuel-7.0/user-guide.html#add-nodes-ug>`_, please consider using odd number of controllers as mentioned in :ref:`Limitations`.
+3.  Add nodes to your environment to which you will assign the **controller role**.
 
-#. Finish
-   `environment configuration for MOS 7.0 <https://docs.mirantis.com/openstack/fuel/fuel-7.0/user-guide.html#configure-your-environment>`_
+   .. note:: When `adding nodes
+      <http://docs.openstack.org/developer/fuel-docs/userdocs/fuel-user-guide/configure-environment/add-nodes.html>`_
+      to the environment and `assign or change a role
+      <http://docs.openstack.org/developer/fuel-docs/userdocs/fuel-user-guide/configure-environment/change-roles.html>`_,
+      do not forget to use an odd number of controllers as mentioned in :ref:`Limitations` section.
 
-#. Run `network verification check for MOS 7.0 <https://docs.mirantis.com/openstack/fuel/fuel-7.0/user-guide.html#verify-networks>`_.
+4. `Verify your network configuration
+   <http://docs.openstack.org/developer/fuel-docs/userdocs/fuel-user-guide/configure-environment/verify-networks.html>`_.
 
-#. Press `Deploy button <https://docs.mirantis.com/openstack/fuel/fuel-7.0/user-guide.html#deploy-changes>`_ to once you are done with environment configuration.
+5. `Deploy your changes
+   <http://docs.openstack.org/developer/fuel-docs/userdocs/fuel-user-guide/deploy-environment.html>`_
+   once you are done with the configuration of your environment.
 
+Plugin Verification
+-------------------
 
+#. Check that the ceilometer-agent-central and ceilometer-alarm-evaluator services are running
+   on each controller.
+   
+   Run ``pcs resource``. You should see the following in the output::
 
-How to check that plugin works
-------------------------------
-#. Check that ceilometer-agent-central and ceilometer-alarm-evaluator services are running
-   on each controller. Run ``pcs resource`` and you should see the following in the output::
+     Clone Set: clone_p_ceilometer-agent-central [p_ceilometer-agent-central]
+       Started: [ node-21.domain.tld node-27.domain.tld node-33.domain.tld ]
 
-          Clone Set: clone_p_ceilometer-agent-central [p_ceilometer-agent-central]
-            Started: [ node-21.domain.tld node-27.domain.tld node-33.domain.tld ]
+     Clone Set: clone_p_ceilometer-alarm-evaluator [p_ceilometer-alarm-evaluator]
+       Started: [ node-21.domain.tld node-27.domain.tld node-33.domain.tld ]
 
-          Clone Set: clone_p_ceilometer-alarm-evaluator [p_ceilometer-alarm-evaluator]
-            Started: [ node-21.domain.tld node-27.domain.tld node-33.domain.tld ]
+   The *Started* list should contain all controllers.
 
-   ``Started`` list should contain all controllers.
+#. For the ceilometer-agent-central, check that the samples are not duplicated.
+   For this check you may choose any metric collected by the ceilometer-agent-central.
+   All the Ceilometer metrics can be found in 
+   `Measurements <http://docs.openstack.org/admin-guide/telemetry-measurements.html>`_ .
+   You may choose any section excepted *OpenStack Compute* and then select a metric with *Pollster Origin*.
+   For example, let's choose *storage.objects*.
 
-#. For the central agent: check that samples are not duplicated. For this purpose you may choose
-   any metric collected by central agent. All these metrics may be found here
-   `Measurements <http://docs.openstack.org/admin-guide-cloud/telemetry-measurements.html>`_ .
-   You may choose any section *except* OpenStack Compute and then select metric with 'Pollster' Origin.
-   For example, let's choose storage.objects.
+   The plugin **works correctly** if you see one sample for each resource type every
+   *polling interval* (1 minute in this example)::
 
-   Plugin works *correctly* if you see one sample for each resource every polling_interval (1 minute in this example)::
+     root@node-2:~# ceilometer sample-list -m storage.objects  -l 10| grep storage.objects
+     | 65e486c734394d3ea321ae72639ebe91 | storage.objects | gauge | 0.0    | object | 2015-11-05T10:32:27 |
+     | 65e486c734394d3ea321ae72639ebe91 | storage.objects | gauge | 0.0    | object | 2015-11-05T10:31:29 |
 
-      root@node-2:~# ceilometer sample-list -m storage.objects  -l 10| grep storage.objects
-      | 65e486c734394d3ea321ae72639ebe91 | storage.objects | gauge | 0.0    | object | 2015-11-05T10:32:27 |
-      | 65e486c734394d3ea321ae72639ebe91 | storage.objects | gauge | 0.0    | object | 2015-11-05T10:31:29 |
+   The plugin **works incorrectly** if there are duplicates. In this example, the plugin works
+   incorectly because there are three samples for the same resource type every *polling interval*::
 
-    
+     root@node-2:~# ceilometer sample-list -m storage.objects  -l 20| grep storage.objects
+     | 65e486c734394d3ea321ae72639ebe91 | storage.objects | gauge | 0.0    | object | 2015-11-05T10:27:37 |
+     | 65e486c734394d3ea321ae72639ebe91 | storage.objects | gauge | 0.0    | object | 2015-11-05T10:27:26 |
+     | 65e486c734394d3ea321ae72639ebe91 | storage.objects | gauge | 0.0    | object | 2015-11-05T10:27:17 |
+     | 65e486c734394d3ea321ae72639ebe91 | storage.objects | gauge | 0.0    | object | 2015-11-05T10:26:38 |
+     | 65e486c734394d3ea321ae72639ebe91 | storage.objects | gauge | 0.0    | object | 2015-11-05T10:26:26 |
+     | 65e486c734394d3ea321ae72639ebe91 | storage.objects | gauge | 0.0    | object | 2015-11-05T10:26:17 |
 
-   Plugin works *incorrectly* if there are duplications. In this example is seen that every
-   ``polling_interval`` there are 3 samples about one resource::
+#. For the alarm evaluator, it is possible to see that everything works as expected
+   only from the logs::
+  
+   # grep extract_my_subset /var/log/TBD
 
-        root@node-2:~# ceilometer sample-list -m storage.objects  -l 20| grep storage.objects
-        | 65e486c734394d3ea321ae72639ebe91 | storage.objects | gauge | 0.0    | object ....|
-        | 65e486c734394d3ea321ae72639ebe91 | storage.objects | gauge | 0.0    | object ....|
-        | 65e486c734394d3ea321ae72639ebe91 | storage.objects | gauge | 0.0    | object ....|
-        | 65e486c734394d3ea321ae72639ebe91 | storage.objects | gauge | 0.0    | object ....|
-        | 65e486c734394d3ea321ae72639ebe91 | storage.objects | gauge | 0.0    | object ....| 
-        | 65e486c734394d3ea321ae72639ebe91 | storage.objects | gauge | 0.0    | object ....| 
-
-        .... 2015-11-05T10:27:37 |
-        .... 2015-11-05T10:27:26 |
-        .... 2015-11-05T10:27:17 |
-        .... 2015-11-05T10:26:38 |
-        .... 2015-11-05T10:26:26 |
-        .... 2015-11-05T10:26:17 |
-
-
-#. For the alarm evaluator, it is possible to see that everything works as expected only from the logs. Grep the
-   line "extract_my_subset". There should be different "My subset: [" results on each alarm evaluator instance.
+   There should be different *My subset: [* results for the ceilometer-alarm-evaluator instances.
