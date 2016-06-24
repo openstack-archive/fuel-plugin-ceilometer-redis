@@ -1,36 +1,51 @@
 Ceilometer Redis plugin
 =======================
 
-Ceilometer Redis Plugin aims to install Redis to MOS environment and provide a coordination mechanism for
-`Ceilometer agents <https://ceilometer.readthedocs.org/en/latest/architecture.html>`_ and Alarm Evaluator
-through the `tooz library <http://docs.openstack.org/developer/tooz/>`_ with a `Redis backend <http://redis.io>`_
-The plugin supports coordination for the following Ceilometer services: central agent and alarm-evaluator.
-Each of these services are running on every controller after the plugin is installed. All of them are joined
-into the corresponding coordination group (one coordination group per each service). It differs from the default
-configuration when there should be only one central agent and alarm-evaluator per cloud. The plugin also configures
-redis-server under pacemaker to monitor its process. The plugin configures `redis-sentinel <http://redis.io/topics/sentinel>`_
-to monitor the state of the redis cluster, to elect new master during failovers, to forward ceilometer services to new
-elected redis master, to organize sync between redis nodes.
+The Ceilometer Redis Plugin is used to install `Redis <http://redis.io>`_ in a
+Mirantis OpenStack (MOS) environment. The plugin provides coordination mechanisms,
+through the use of the `tooz library <http://docs.openstack.org/developer/tooz/>`_,
+to enable the horizontal scaling of the
+`Ceilometer Agents <https://ceilometer.readthedocs.org/en/latest/architecture.html>`_
+and Alarm Evaluators. In its current version, the plugin enables horizontal
+scaling for the following Ceilometer services:
 
+  * The Central Agent
+  * The Alarm Evaluator
 
-Central agent
+Each of these services are running on all the controllers after the plugin is installed.
+All of them are joined into the corresponding coordination group (one coordination group per service).
+This differs from the default configuration when there is only one Central Agent and
+one Alarm Evaluator per MOS environment.
+The plugin also configures *redis-server* under Pacemaker to monitor its process.
+The plugin configures `redis-sentinel <http://redis.io/topics/sentinel>`_ to:
+
+  * Monitor the state of the Redis cluster
+  * Elect a new master during a failover
+  * Forward the Ceilometer services to the elected Redis master
+  * Organize the synchronization between Redis nodes.
+
+Central Agent
 -------------
-Ceilometer Central agent is responsible for polling all OpenStack resources except Nova's (Nova resources,
-i.e. vms, are polled by a Compute agent). Without coordination enabled, only one Central agent should be running
-per cloud. The reason is that all the central agents have the same set of OpenStack resources to poll every
-configurable time interval. If coordination is not enabled, each OpenStack resource will be polled as many times
-as many instances of Central agents are running in a cloud.
-Thus, coordination provides a disjoint set of OpenStack resources to poll for every Central agent running on the
-cloud to avoid polling one resource several times.
+The Central Agent is responsible for polling all the OpenStack resources
+excepted those of Nova, like the VMs, which are polled by the Compute Agent.
+Without coordination, there can be only one Central Agent running at a time.
+This is because by default, the Central Agent works on the entire resources set.
+Running multiple Central Agents without coordination would poll the entire
+resources set as many times as the number of Central Agents running every polling
+interval. This is not how to scale the Central Agent functions.
+Thus, coordination allows to create shards of disjoint resources sets
+to distribute the polling workload across multiple Central Agents.  
 
 Alarm evaluator
 ---------------
-Ceilometer alarm evaluator service is responsible for Ceilometer alarm evaluation.
-By default, in MOS there is only one alarm evaluator per cloud. The reason is the same as for a central agent.
-If there are several alarm evaluators and no coordination enabled, all of them will evaluate the same set of alarms
-every configurable time interval. The alarm sets for evaluators should be disjoint. So, coordination is responsible
-for providing the set of alarms to evaluate to each alarm-evaluator in the cloud.
-
+The Ceilometer Alarm Evaluator service is responsible for Ceilometer alarms evaluation.
+By default, in MOS there is only one Alarm Evaluator per environment.
+The reason is the same as for the Central Agent.
+If there are several Alarm Evaluators and no coordination enabled,
+then all the Alarm Evaluators will evaluate the same set of alarms
+every configurable time interval.
+Thus, coordination allows to create shards of disjoint alarms sets
+to distribute the alarms evaluation workload across multiple Alarm Evaluators. 
 
 Requirements
 ------------
@@ -47,11 +62,11 @@ tooz                    <0.14.0,>=0.13.1
 Limitations
 -----------
 
-* The plugin works correctly only on clouds with odd numbers of controllers.
-  This requirement is mandatory because Redis needs an odd number of nodes to
-  choose the master successfully.
+* The plugin works correctly only in environments with an odd number of controllers.
+  This requirement is mandatory because Redis needs an odd number of nodes to be
+  able to elect a master.
 
-* Before Liberty, there was no need to coordinate Ceilometer notification agents. Starting from Liberty, samples
+* Before Liberty, there was no need to coordinate Ceilometer Notification Agents. Starting from Liberty, samples
   transformations started to be handled not by compute/central agents as it was before, but by a notification agent.
   Some of Ceilometer transformers have a local cache where they store the data from the previously processed samples.
   For example, "cpu_util" metric are obtained from two consecutive Samples with "cpu" metric: one is subtracted from
