@@ -3,8 +3,8 @@
 - id: primary_create_redis_ocf
   type: puppet
   groups: [primary-controller]
-  required_for: [deploy_end]
-  requires: [ceilometer-controller]
+  required_for: [primary-cluster]
+  requires: [fuel_pkgs]
   parameters:
     puppet_manifest: "puppet/manifests/create_redis_ocf.pp"
     puppet_modules: "puppet/modules:/etc/puppet/modules"
@@ -13,8 +13,8 @@
 - id: create_redis_ocf
   type: puppet
   groups: [controller]
-  required_for: [deploy_end]
-  requires: [ceilometer-controller]
+  required_for: [cluster]
+  requires: [fuel_pkgs]
   cross-depends:
     - name: primary_create_redis_ocf
   parameters:
