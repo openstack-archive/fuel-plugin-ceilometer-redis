@@ -1,0 +1,9 @@
+Code-Review+1: Mykyta Karpin <mkarpin@mirantis.com>
+Code-Review+2: Nadya Shakhat <nprivalova@mirantis.com>
+Workflow+1: Nadya Shakhat <nprivalova@mirantis.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Thu, 14 Jul 2016 12:02:29 +0000
+Reviewed-on: https://review.openstack.org/314611
+Project: openstack/fuel-plugin-ceilometer-redis
+Branch: refs/heads/master
