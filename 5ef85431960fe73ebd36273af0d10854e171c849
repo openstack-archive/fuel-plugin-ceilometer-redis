@@ -1,0 +1,9 @@
+Code-Review+2: Ilya Tyaptin <ityaptin@mirantis.com>
+Code-Review+2: Ivan Berezovskiy <iberezovskiy@mirantis.com>
+Workflow+1: Ilya Tyaptin <ityaptin@mirantis.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Mon, 25 Jul 2016 14:48:02 +0000
+Reviewed-on: https://review.openstack.org/344810
+Project: openstack/fuel-plugin-ceilometer-redis
+Branch: refs/heads/master
