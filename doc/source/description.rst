@@ -5,11 +5,13 @@ The *Ceilometer Redis Plugin* installs `Redis <http://redis.io>`_ and
 the `Tooz library <http://docs.openstack.org/developer/tooz/>`_, in a
 Mirantis OpenStack (MOS) environment deployed by Fuel.
 Both Redis and the Tooz library should be installed on all the controller
-nodes of the environment.
+nodes of the environment. Starting from MOS 9.0, Ceilometer alarming service was
+moved to the project called Aodh.
+
 
 The *Ceilometer Redis Plugin* is used to provide coordination mechanisms to
-enable the horizontal scaling of the Ceilometer services. Using the plugin,
-the Ceilometer services are joined into a so-called **coordination group**,
+enable the horizontal scaling of the Ceilometer/Aodh services. Using the plugin,
+the Ceilometer/Aodh services are joined into a so-called **coordination group**,
 which allows for resources and alarms sharding.
 There is one coordination group per service type.
 
@@ -17,7 +19,7 @@ Please refer to the `Telemetry architecture
 <http://docs.openstack.org/admin-guide/telemetry-system-architecture.html>`_
 documentation for more information about the Ceilometer services.
 
-In MOS 7.0 and MOS 8.0, the *Ceilometer Redis Plugin* enables coordination
+In MOS 9.0, the *Ceilometer Redis Plugin* enables coordination
 for both:
 
   * The **ceilometer-agent-central service**.
@@ -34,20 +36,20 @@ for both:
     across multiple instances of the ceilometer-agent-central using disjoint sets
     of resources.
 
-  * The **ceilometer-alarm-evaluator service**.
+  * The **aodh-evaluator service**.
 
-    The **ceilometer-alarm-evaluator** service is responsible for evaluating the Ceilometer alarms.
-    By default, there is only one ceilometer-alarm-evaluator running per environment.
-    Without coordination, there can be only one ceilometer-alarm-evaluator running at a time.
-    This is because, as for the ceilometer-agent-central, the ceilometer-alarm-evaluator works
-    with an entire set of alarms. Running multiple ceilometer-alarm-evaluator
+    The **aodh-evaluator** service is responsible for evaluating the Ceilometer alarms.
+    By default, there is only one aodh-evaluator running per environment.
+    Without coordination, there can be only one aodh-evaluator running at a time.
+    This is because, as for the ceilometer-agent-central, the aodh-evaluator works
+    with an entire set of alarms. Running multiple aodh-evaluator
     without coordination would evaluate all the alarms as many times as the number of evaluators
     running on the controller nodes every evaluation interval. To cope with this problem,
     the coordination mechanism provided by the *Ceilometer Redis Plugin* allows distributing
-    the alarms evaluation workload across multiple instances of the ceilometer-alarm-evaluator
+    the alarms evaluation workload across multiple instances of the aodh-evaluator
     using disjoint sets of alarms.
 
-Please note that with MOS 8.0, the *Ceilometer Redis Plugin* doesn't provide support
+Please note that starting from MOS 8.0, the *Ceilometer Redis Plugin* doesn't provide support
 (out-of-the-box) for the coordination of the **ceilometer-agent-notification** service because
 it is not needed for the most common samples transformations.
 
@@ -56,7 +58,7 @@ it is not needed for the most common samples transformations.
    In Liberty, the transformation of the samples was moved
    to the **ceilometer-agent-notification** service, but after thorough performance analysis
    of Ceilometer at scale, we discovered that this change has a bad impact on performance.
-   In MOS 8.0, the transformations for the following list of measurements were moved back
+   Starting from MOS 8.0, the transformations for the following list of measurements were moved back
    to the ceilometer-agent-compute service.
 
    * cpu_util
@@ -72,7 +74,7 @@ it is not needed for the most common samples transformations.
    * network.incoming.packets.rate
    * network.outgoing.packets.rate
 
-   As a result, in MOS 8.0, there is no need to run the ceilometer-agent-notification
+   As a result, starting from MOS 8.0, there is no need to run the ceilometer-agent-notification
    in coordination mode unless you need to maintain the transformation of custom samples that
    are not listed above. In this case, it is possible to enable coordination for the
    ceilometer-agent-notification service manually event though, it is not recommended
@@ -93,7 +95,7 @@ Requirements
 ======================= ================
 Requirements            Version/Comment
 ======================= ================
-MOS                     7.0, 8.0
+MOS                     9.0
 Tooz                    <0.14.0,>=0.13.1
 ======================= ================
 
