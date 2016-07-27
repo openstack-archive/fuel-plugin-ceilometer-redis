@@ -7,7 +7,7 @@ master_doc = 'index'
 project = u'The Ceilometer Redis Plugin'
 copyright = u'2016, Mirantis Inc.'
 version = '0.1'
-release = '0.1.2'
+release = '0.1.3'
 exclude_patterns = [
 ]
 pygments_style = 'sphinx'
