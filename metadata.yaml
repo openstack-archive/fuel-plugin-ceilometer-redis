@@ -3,7 +3,7 @@ name: ceilometer-redis
 # Human-readable name for your plugin
 title: Redis plugin for Ceilometer
 # Plugin version
-version: 1.0.2
+version: 1.0.3
 # Description
 description: Ceilometer extension that provides a workload-partitioning and HA for ceilometer services
 # Required fuel version
@@ -11,7 +11,7 @@ fuel_version: ['9.0']
 # Specify license of your plugin
 licenses: ['Apache License Version 2.0']
 # Specify author or company name
-authors: ['Ivan Berezovskiy', 'Ilya Tyaptin']
+authors: ['Ivan Berezovskiy', 'Ilya Tyaptin', 'Nikita Karpin']
 # A link to the plugin's page
 homepage: 'https://github.com/openstack/fuel-plugin-ceilometer-redis'
 # Groups

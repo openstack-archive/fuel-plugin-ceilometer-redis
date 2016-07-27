@@ -3,10 +3,10 @@ User Guide
 
 Once the *Ceilometer Redis Plugin* is installed following the instructions of
 the :ref:`Installation Guide`, you can create a Mirantis OpenStack (MOS) environment
-with Ceilometer whose **ceilometer-agent-central** and **ceilometer-alarm-evaluator**
+with Ceilometer and Aodh whose **ceilometer-agent-central** and **aodh-evaluator**
 services will work in **workload partitioned** mode.
-This plugin was created to enable the scale-out of these Ceilometer services.
-It is useless and **shouldn't be used if Ceilometer is not installed**.
+This plugin was created to enable the scale-out of these Ceilometer/Aodh services.
+It is useless and **shouldn't be used if Ceilometer and Aodh are not installed**.
 
 Plugin Configuration
 --------------------
@@ -21,29 +21,16 @@ with the `Telemetry service
 
    Go to the *Plugins* tab. You should see the following:
 
-   On Mos 8.0
-
    .. image:: images/redis-plugin.png
-    :width: 100%
-
-   On Mos 7.0
-
-   .. image:: images/redis-plugin-on8-0.png
     :width: 100%
 
 2. Enable the plugin.
 
    Go to the *Environments* tab and select the *Redis plugin for Ceilometer* checkbox:
 
-   On Mos 8.0
-
    .. image:: images/redis-plugin-8-0.png
     :width: 100%
 
-   On Mos 7.0
-
-   .. image:: images/redis-plugin-on.png
-    :width: 100%
 
 3.  Add nodes to your environment to which you will assign the **controller role**.
 
@@ -63,15 +50,15 @@ with the `Telemetry service
 Plugin Verification
 -------------------
 
-#. Check that the ceilometer-agent-central and ceilometer-alarm-evaluator services are running
+#. Check that the ceilometer-agent-central and aodh-evaluator services are running
    on each controller.
 
-   Run ``pcs resource``. You should see the following in the output::
+   Run ``http://docs.openstack.org/developer/fuel-docs/userdocs/fuel-user-guide/deploy-environment.html`. You should see the following in the output::
 
      Clone Set: clone_p_ceilometer-agent-central [p_ceilometer-agent-central]
        Started: [ node-21.domain.tld node-27.domain.tld node-33.domain.tld ]
 
-     Clone Set: clone_p_ceilometer-alarm-evaluator [p_ceilometer-alarm-evaluator]
+     Clone Set: clone_p_aodh-evaluator [p_aodh-evaluator]
        Started: [ node-21.domain.tld node-27.domain.tld node-33.domain.tld ]
 
    The *Started* list should contain all controllers.
@@ -104,6 +91,6 @@ Plugin Verification
 #. For the alarm evaluator, it is possible to see that everything works as expected
    only from the logs::
 
-   # grep extract_my_subset /var/log/ceilometer/ceilometer-alarm-evaluator.log
+   # grep extract_my_subset /var/log/aodh/aodh-evaluator.log
 
-   There should be different *My subset: [* results for the ceilometer-alarm-evaluator instances.
+   There should be different *My subset: [* results for the aodh-evaluator instances.
