@@ -96,7 +96,7 @@ Requirements
 Requirements            Version/Comment
 ======================= ================
 MOS                     9.0
-Tooz                    <0.14.0,>=0.13.1
+Tooz                    >=1.28.0
 ======================= ================
 
 .. _limitations:
